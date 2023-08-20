@@ -2,14 +2,14 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 from users.api.interactors.createUser import createUserInteractor
 from users.api.interactors.getUserById import getUserByIdInteractor
 from users.api.interactors.getUsers import getUsersInteractor
 from users.api.interactors.updateUser import updateUserInteractor
 from users.api.interactors.deleteUser import deleteUserInteractor
+from users.api.interactors.userExists import userExists
+from users.api.lib.validateValidEmail import isValidEmail
 from users.api.serializers import UserSerializer
-from django.utils.decorators import method_decorator
 
 @require_http_methods(["GET"])
 def getUsers(request):
@@ -33,7 +33,13 @@ def createUser(request):
 
     email = body.get("email")
     password = body.get("password")
+    print("email", email)
 
+    if not isValidEmail(email):
+        raise Exception("User email is not valid")
+    if userExists(email):
+        raise Exception("User email is not unique")
+    
     userCreated = createUserInteractor(email, password)
 
     if userCreated:
