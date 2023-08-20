@@ -13,4 +13,4 @@ class UserData(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.email, self.identification
+        return self.identification, self.names, self.lastNames, self.address, self.phoneNumber

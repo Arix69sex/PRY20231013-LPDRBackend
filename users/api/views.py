@@ -10,7 +10,6 @@ from users.api.interactors.updateUser import updateUserInteractor
 from users.api.interactors.deleteUser import deleteUserInteractor
 from users.api.serializers import UserSerializer
 from django.utils.decorators import method_decorator
-from rest_framework.decorators import permission_classes
 
 @require_http_methods(["GET"])
 def getUsers(request):
@@ -21,10 +20,13 @@ def getUsers(request):
 @require_http_methods(["GET"])
 def getUsersById(request, userId):
     user = getUserByIdInteractor(userId)
-    userData = UserSerializer(user)
+    if isinstance(user, JsonResponse):
+        return user
+    else:
+        userData = UserSerializer(user)
     return JsonResponse({'user': userData.data})
 
-@require_http_methods(["POST"])  # Ensure that the view only accepts POST requests
+@require_http_methods(["POST"])
 @csrf_exempt  # Use this decorator for development to disable CSRF protection; use proper CSRF handling in production
 def createUser(request):
     body = json.loads(request.body.decode('utf-8'))
@@ -40,19 +42,18 @@ def createUser(request):
     else:
         statusCode = 400
         responseMessage = 'User creation failed'
-    return JsonResponse(responseMessage, status=statusCode)
+    return JsonResponse(responseMessage, status=statusCode, safe=False)
 
-@require_http_methods(["PATCH"]) # Ensure that the view only accepts PATCH requests
-@method_decorator(csrf_exempt)   # Use this decorator for development to disable CSRF protection; use proper CSRF handling in production
-def updateUser(request):
+@require_http_methods(["PATCH"])
+@csrf_exempt   # Use this decorator for development to disable CSRF protection; use proper CSRF handling in production
+def updateUser(request, userId):
     if (request.method == "PATCH"):
         body = json.loads(request.body.decode('utf-8'))
 
-        id = body.get("id")
         email = body.get("email")
         password = body.get("password")
-
-        userUpdated = updateUserInteractor(id, email, password)
+        user = getUserByIdInteractor(userId)
+        userUpdated = updateUserInteractor(user, email, password)
 
         if userUpdated:
             statusCode = 200
@@ -60,19 +61,17 @@ def updateUser(request):
         else:
             statusCode = 400
             responseMessage = 'User update failed'
-        return JsonResponse(responseMessage, status=statusCode)
+        return JsonResponse(responseMessage, status=statusCode, safe=False)
     else:
-        return JsonResponse("Method not allowed", status=405)
+        return JsonResponse("Method not allowed", status=405, safe=False)
     
-@require_http_methods(["DELETE"]) # Ensure that the view only accepts PATCH requests
-@method_decorator(csrf_exempt)   # Use this decorator for development to disable CSRF protection; use proper CSRF handling in production
-def deleteUser(request):
+@require_http_methods(["DELETE"])
+@csrf_exempt # Use this decorator for development to disable CSRF protection; use proper CSRF handling in production
+def deleteUser(request, userId):
     if (request.method == "DELETE"):
-        body = json.loads(request.body.decode('utf-8'))
 
-        id = body.get("id")
-
-        userDeleted = deleteUserInteractor(id)
+        userToDelete = getUserByIdInteractor(userId)
+        userDeleted = deleteUserInteractor(userToDelete)
 
         if userDeleted:
             statusCode = 200
@@ -80,6 +79,6 @@ def deleteUser(request):
         else:
             statusCode = 400
             responseMessage = 'User delete failed'
-        return JsonResponse(responseMessage, status=statusCode)
+        return JsonResponse(responseMessage, status=statusCode, safe=False)
     else:
-        return JsonResponse("Method not allowed", status=405)
+        return JsonResponse("Method not allowed", status=405, safe=False)

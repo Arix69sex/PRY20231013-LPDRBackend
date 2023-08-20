@@ -5,8 +5,8 @@ from . import views
 
 urlpatterns = [
     path('', views.getUsers, name='get All Users'),
-    path('', views.createUser, name='Create an User'),
-    #path('<int:userId>', views.getUsersById, name='get User By Id'),  
-    #path('<int:userId>', views.createUser, name='Update an User'),
-    #path('<int:userId>', views.createUser, name='Delete an User'),
+    path('create', views.createUser, name='Create an User'),
+    path('<int:userId>', views.getUsersById, name='get User By Id'),  
+    path('<int:userId>/update', views.updateUser, name='Update an User'),
+    path('<int:userId>/delete', views.deleteUser, name='Delete an User'),
 ]
