@@ -2,6 +2,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from users.api.decorators.JwtAuthRequired import JwtAuthRequired
 from users.api.interactors.getUserById import getUserByIdInteractor
 from usersData.api.interactors.createUserDataInteractor import createUserDataByIdInteractor
 from usersData.api.interactors.getUserDataByIdInteractor import getUserDataByIdInteractor
@@ -12,12 +13,14 @@ from usersData.api.lib.validateUserHasData import validateUserHasData
 
 from usersData.api.serializers import UserDataSerializer
 
+@JwtAuthRequired
 @require_http_methods(["GET"])
 def getUsersData(request):
     usersData = getUsersDataInteractor()
     usersData = [UserDataSerializer(userData).data for userData in usersData]
     return JsonResponse({'usersData': usersData})
 
+@JwtAuthRequired
 @require_http_methods(["GET"])
 def getUserDataById(request, userDataId):
     userData = getUserDataByIdInteractor(userDataId)
@@ -27,6 +30,7 @@ def getUserDataById(request, userDataId):
         userData = UserDataSerializer(userData)
     return JsonResponse({'userData': userData.data})
 
+@JwtAuthRequired
 @require_http_methods(["GET"])
 def getUserDataByUserId(request, userId):
     user = getUserByIdInteractor(userId)
@@ -37,6 +41,7 @@ def getUserDataByUserId(request, userId):
         userData = UserDataSerializer(userData.first())
     return JsonResponse({'userData': userData.data})
 
+@JwtAuthRequired
 @require_http_methods(["POST"])
 @csrf_exempt  # Use this decorator for development to disable CSRF protection; use proper CSRF handling in production
 def createUserData(request, userId):
