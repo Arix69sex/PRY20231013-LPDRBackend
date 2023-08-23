@@ -24,4 +24,5 @@ urlpatterns = [
     path('api/licensePlates/', include('licensePlates.api.urls')),
     path('api/vehicles/', include('vehicles.api.urls')),
     path('api/owners/', include('owners.api.urls')),
+    path('api/infractions/', include('infractions.api.urls'))
 ]

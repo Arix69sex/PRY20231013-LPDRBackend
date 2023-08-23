@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'usersData',
     'licensePlates',
     'vehicles',
-    'owners'
+    'owners',
+    'infractions'
 ]
 
 MIDDLEWARE = [
