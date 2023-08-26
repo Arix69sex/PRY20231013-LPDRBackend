@@ -113,12 +113,12 @@ def login(request):
 
     user = getUserByEmailInteractor(email)
     if userExists and encryptorInstance.verify(password, user[0].password):
-        expiration_time = datetime.utcnow() + timedelta(week=1)
+        expirationTime = datetime.utcnow() + timedelta(days=7)
         statusCode = 201
         responseMessage = JWTinstance.encode({
             "id": user[0].id,
             "email": email,
-           "exp": expiration_time
+           "exp": expirationTime
         })
     else:
         statusCode = 400
@@ -140,14 +140,14 @@ def signUp(request):
         return JsonResponse("User email is not unique.", status=400, safe=False)
     
     userCreated = createUserInteractor(email, encryptedPassword)
-    expiration_time = datetime.utcnow() + timedelta(week=1)
+    expirationTime = datetime.utcnow() + timedelta(days=7)
 
     if userCreated:
         statusCode = 201
         responseMessage = JWTinstance.encode({
             "id": userCreated.id,
             "email": email,
-            "exp": expiration_time
+            "exp": expirationTime
         })
     else:
         statusCode = 400
