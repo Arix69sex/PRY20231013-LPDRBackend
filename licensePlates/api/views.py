@@ -53,9 +53,10 @@ def createLicensePlate(request):
     hasInfractions = body.get("hasInfractions")
     takenActions = body.get("takenActions")
     userId = body.get("userId")
+    imageData = body.get("imageData")
     user = getUserByIdInteractor(userId)
     
-    licensePlateCreated = createLicensePlateInteractor(user, code, latitude, longitude, hasInfractions, takenActions)
+    licensePlateCreated = createLicensePlateInteractor(user, code, latitude, longitude, hasInfractions, takenActions, imageData)
 
     if licensePlateCreated:
         statusCode = 201
@@ -77,8 +78,9 @@ def updateLicensePlate(request, licensePlateId):
         longitude = body.get("longitude")
         hasInfractions = body.get("hasInfractions")
         takenActions = body.get("takenActions")
+        imageData = body.get("imageData")
         licensePlate = getLicensePlateByIdInteractor(licensePlateId)
-        licensePlateUpdated = updatelicensePlateInteractor(licensePlate, code, latitude, longitude, hasInfractions, takenActions)
+        licensePlateUpdated = updatelicensePlateInteractor(licensePlate, code, latitude, longitude, hasInfractions, takenActions, imageData)
 
         if licensePlateUpdated:
             statusCode = 200
