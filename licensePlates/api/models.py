@@ -9,6 +9,7 @@ class LicensePlate(models.Model):
     longitude = models.FloatField()
     hasInfractions = models.BooleanField(default=False)
     takenActions = models.BooleanField(default=False)
+    imageData = models.TextField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     createdAt = models.DateTimeField(auto_now_add=True)
 
