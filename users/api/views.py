@@ -17,6 +17,8 @@ from users.api.serializers import UserSerializer
 from users.api.interface.JWT import JWT
 from django.contrib.auth.decorators import login_required
 
+from usersData.api.interactors.createUserDataInteractor import createUserDataByIdInteractor
+
 @require_http_methods(["GET"])
 def getUsers(request):
     users = getUsersInteractor()
@@ -140,6 +142,7 @@ def signUp(request):
         return JsonResponse("User email is not unique.", status=400, safe=False)
     
     userCreated = createUserInteractor(email, encryptedPassword)
+    createUserDataByIdInteractor(userCreated)
     expirationTime = datetime.utcnow() + timedelta(days=7)
 
     if userCreated:

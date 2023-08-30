@@ -13,7 +13,9 @@ def JwtAuthRequired(viewFunction):
         JWTinstance = JWT()
         if auth_header and auth_header.startswith('Bearer '):
             token = auth_header.split(' ')[1]
+
             payload = JWTinstance.decode(token)
+
             try:
                 payload = JWTinstance.decode(token)
                 return viewFunction(request, *args, **kwargs)

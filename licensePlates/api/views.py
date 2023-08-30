@@ -80,8 +80,8 @@ def updateLicensePlate(request, licensePlateId):
         takenActions = body.get("takenActions")
         imageData = body.get("imageData")
         licensePlate = getLicensePlateByIdInteractor(licensePlateId)
-        licensePlateUpdated = updatelicensePlateInteractor(licensePlate, code, latitude, longitude, hasInfractions, takenActions, imageData)
 
+        licensePlateUpdated = updatelicensePlateInteractor(licensePlate, code, latitude, longitude, hasInfractions, takenActions, imageData)
         if licensePlateUpdated:
             statusCode = 200
             responseMessage = 'License plate updated successfully'
