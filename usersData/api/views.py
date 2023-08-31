@@ -36,7 +36,7 @@ def getUserDataByUserId(request, userId):
     user = getUserByIdInteractor(userId)
     userData = getUserDataByUserInteractor(user)
     if isinstance(userData, JsonResponse) or not userData.exists():
-        return JsonResponse("User doesn't have User Data", status=400, safe=False)
+        return JsonResponse({'userData': {}}, status=200, safe=False)
     else:
         userData = UserDataSerializer(userData.first())
     return JsonResponse({'userData': userData.data})

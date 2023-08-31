@@ -36,7 +36,7 @@ def getOwnerByLicensePlateId(request, licensePlateId):
     licensePlate = getLicensePlateByIdInteractor(licensePlateId)
     owner = getOwnerByLicensePlateInteractor(licensePlate)
     if isinstance(owner, JsonResponse) or not owner.exists():
-        return JsonResponse("License plate doesn't have owner associated", status=400, safe=False)
+        return JsonResponse({'owner': []}, status=200, safe=False)
     else:
         owner = OwnerSerializer(owner.first())
     return JsonResponse({'owner': owner.data})

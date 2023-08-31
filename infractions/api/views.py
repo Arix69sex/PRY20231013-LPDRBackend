@@ -35,7 +35,7 @@ def getInfractionByLicensePlateId(request, licensePlateId):
     if isinstance(infractions, JsonResponse):
         return infractions
     elif len(infractions) < 1:
-        return JsonResponse("Infraction has no license plates", status=400, safe=False)
+        return JsonResponse({'infraction': []}, status=200, safe=False)
     else:
         infractions = InfractionSerializer(infractions, many=True)
     return JsonResponse({'infraction': infractions.data})

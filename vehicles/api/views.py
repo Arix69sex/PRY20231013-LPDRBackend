@@ -36,7 +36,7 @@ def getVehicleByLicensePlateId(request, licensePlateId):
     licensePlate = getLicensePlateByIdInteractor(licensePlateId)
     vehicle = getVehicleByLicensePlateInteractor(licensePlate)
     if isinstance(vehicle, JsonResponse) or not vehicle.exists():
-        return JsonResponse("License plate doesn't have vehicle associated", status=400, safe=False)
+        return JsonResponse({'vehicle': []}, status=200, safe=False)
     else:
         vehicle = VehicleSerializer(vehicle.first())
     return JsonResponse({'vehicle': vehicle.data})

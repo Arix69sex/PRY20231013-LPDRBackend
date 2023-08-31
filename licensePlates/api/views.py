@@ -36,7 +36,7 @@ def getLicensePlateByUserId(request, userId):
     if isinstance(licensePlates, JsonResponse):
         return licensePlates
     elif len(licensePlates) < 1:
-        return JsonResponse("User has no license plates", status=400, safe=False)
+        return JsonResponse({'licensePlate': []}, status=200, safe=False)
     else:
         licensePlates = LicencePlateSerializer(licensePlates, many=True)
     return JsonResponse({'licensePlate': licensePlates.data})
