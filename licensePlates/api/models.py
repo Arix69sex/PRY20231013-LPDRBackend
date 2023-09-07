@@ -15,3 +15,10 @@ class LicensePlate(models.Model):
 
     def __str__(self):
         return self.code, self.latitude, self.longitude, self.hasInfractions, self.takenActions, self.user
+    
+
+class TestImage(models.Model):
+    image = models.ImageField(upload_to='images/')
+
+    def __str__(self):
+        return self.image

@@ -7,9 +7,12 @@ from licensePlates.api.interactors.getLicensePlateByIdInteractor import getLicen
 from licensePlates.api.interactors.getLicensePlatesByUserInteractor import getLicensePlatesByUserInteractor
 from licensePlates.api.interactors.getLicensePlatesInteractor import getLicensePlatesInteractor
 from licensePlates.api.interactors.updateLicensePlateInteractor import updatelicensePlateInteractor
+from licensePlates.api.models import TestImage
 from users.api.decorators.JwtAuthRequired import JwtAuthRequired
 from users.api.interactors.getUserById import getUserByIdInteractor
 from licensePlates.api.serializers import LicencePlateSerializer
+from PIL import Image
+from io import BytesIO
 
 @require_http_methods(["GET"])
 def getLicensePlates(request):
@@ -89,5 +92,25 @@ def updateLicensePlate(request, licensePlateId):
             statusCode = 400
             responseMessage = 'License plate update failed'
         return JsonResponse(responseMessage, status=statusCode, safe=False)
+    else:
+        return JsonResponse("Method not allowed", status=405, safe=False)
+    
+
+@require_http_methods(["POST"])
+@JwtAuthRequired
+@csrf_exempt   # Use this decorator for development to disable CSRF protection; use proper CSRF handling in production
+def processBytesToImage(request):
+    if (request.method == "POST"):
+        body = json.loads(request.body.decode('utf-8'))
+        image_data = body.get("bytes")
+        image_bytes = bytes(image_data)  # This contains the raw bytes
+        #print("image_data", image_data)
+        # Convert the bytes to an image
+        image = Image.open(BytesIO(image_bytes))
+
+        # Process the image here
+        # For example, you can resize it, apply filters, etc.
+        processed_image = image.resize((200, 200))  # Example: Resize to 200x200
+        TestImage.objects.create(image=processed_image)
     else:
         return JsonResponse("Method not allowed", status=405, safe=False)
