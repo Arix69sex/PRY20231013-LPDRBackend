@@ -19,6 +19,3 @@ class LicensePlate(models.Model):
 
 class TestImage(models.Model):
     image = models.ImageField(upload_to='images/')
-
-    def __str__(self):
-        return self.image

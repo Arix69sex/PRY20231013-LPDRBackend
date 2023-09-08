@@ -13,6 +13,7 @@ from users.api.interactors.getUserById import getUserByIdInteractor
 from licensePlates.api.serializers import LicencePlateSerializer
 from PIL import Image
 from io import BytesIO
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 @require_http_methods(["GET"])
 def getLicensePlates(request):
@@ -104,13 +105,20 @@ def processBytesToImage(request):
         body = json.loads(request.body.decode('utf-8'))
         image_data = body.get("bytes")
         image_bytes = bytes(image_data)  # This contains the raw bytes
-        #print("image_data", image_data)
-        # Convert the bytes to an image
+        
         image = Image.open(BytesIO(image_bytes))
 
-        # Process the image here
-        # For example, you can resize it, apply filters, etc.
-        processed_image = image.resize((200, 200))  # Example: Resize to 200x200
-        TestImage.objects.create(image=processed_image)
+        processed_image = image.resize((200, 200))
+        temp_file = BytesIO()
+        processed_image.save(temp_file, format='JPEG')
+        uploaded_file = SimpleUploadedFile("temp_image.jpg", temp_file.getvalue())
+
+
+        testImage = TestImage.objects.create(image=uploaded_file)
+        print(testImage.id)
+        temp_file.close()
+
+        
+        return JsonResponse("Done", status=200, safe=False)
     else:
         return JsonResponse("Method not allowed", status=405, safe=False)
