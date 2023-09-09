@@ -1,0 +1,4 @@
+*.jpg
+yolov5
+darknet
+__pycache__
