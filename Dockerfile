@@ -16,11 +16,15 @@ RUN ln -sf /usr/lib/x86_64-linux-gnu/libgeotiff.so.5 /opt/conda/lib/libgeotiff.s
 RUN ln -sf /usr/lib/x86_64-linux-gnu/libtiff.so.5 /opt/conda/lib/libtiff.so.5
 
 
+RUN conda create -n new-base python=3.10
+RUN conda init bash
+SHELL ["conda", "run", "-n", "new-base", "/bin/bash", "-c"]
+
+
 COPY requirements.txt /workspace/
 WORKDIR /workspace
 RUN pip install --no-cache-dir -r requirements.txt
 
 #Install jupyter notebook
-RUN conda install python=3.10
 RUN conda install jupyter -y --quiet
-#CMD ["jupyter notebook", "--notebook-dir=/opt/notebooks", "--ip='*'", "--port=8888", "--no-browser", "--allow-root"]
+#CMD ["jupyter notebook", "--ip='0.0.0.0'", "--port=8888", "--no-browser", "--allow-root"]

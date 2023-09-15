@@ -11,3 +11,4 @@ services:
     command: sleep infinity
     ports:
       - 8009:8000
+      - 8888:8888
