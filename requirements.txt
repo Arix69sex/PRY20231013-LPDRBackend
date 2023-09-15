@@ -1,0 +1,6 @@
+djangorestframework
+Pillow
+pyjwt
+python-decouple
+django-cors-headers
+ipykernel

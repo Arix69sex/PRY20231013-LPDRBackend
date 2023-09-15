@@ -1,2 +1,2 @@
 classes = 36
-names = yolo/recognition/config-files/data/obj.names
+names = /workspace/lpdr/recognition/config-files/data/obj.names

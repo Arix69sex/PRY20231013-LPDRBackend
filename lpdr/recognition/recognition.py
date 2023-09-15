@@ -1,11 +1,15 @@
 import cv2
 import pandas as pd
+import os
 
 import lpdr.recognition.darknet.darknet as darknet
 
-CFG_FILE = "/workspaces/anaconda-8/yolo/recognition/config-files/cfg/custom-yolov4-tiny-detector.cfg"
-WEIGTHS_FILE = "/workspaces/anaconda-8/yolo/recognition/config-files/weigths/custom-yolov4-tiny-detector_best.weights"
-DATA_FILE = "/workspaces/anaconda-8/yolo/recognition/config-files/data/obj.data"
+
+cwd = os.path.dirname(__file__)
+
+CFG_FILE        = cwd + "/config-files/cfg/custom-yolov4-tiny-detector.cfg"
+WEIGTHS_FILE    = cwd + "/config-files/weigths/custom-yolov4-tiny-detector_best.weights"
+DATA_FILE       = cwd + "/config-files/data/obj.data"
 
 network, class_names, class_colors = darknet.load_network(CFG_FILE, DATA_FILE, WEIGTHS_FILE)
 width = darknet.network_width(network)

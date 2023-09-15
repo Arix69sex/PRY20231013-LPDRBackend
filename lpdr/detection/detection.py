@@ -1,7 +1,7 @@
 import torch
 import cv2
 
-model = torch.hub.load('yolo/detection/yolov5', 'custom', path='yolo/detection/weigths/best_yolo_cbam.pt', source='local')
+model = torch.hub.load('lpdr/detection/yolov5', 'custom', path='lpdr/detection/weigths/best_yolo_cbam.pt', source='local')
 
 def get_plates_image(image):
 

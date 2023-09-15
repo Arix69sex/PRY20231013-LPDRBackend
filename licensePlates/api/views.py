@@ -15,8 +15,15 @@ from PIL import Image
 from io import BytesIO
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from lpdr.lpdr import get_license_plate
+import cv2
+
 @require_http_methods(["GET"])
 def getLicensePlates(request):
+    
+    im = cv2.imread('/workspace/lpdr/vehicle.jpeg')
+    print(get_license_plate(im))
+    
     licensePlates = getLicensePlatesInteractor()
     licensePlateData = [LicencePlateSerializer(licensePlate).data for licensePlate in licensePlates]
     return JsonResponse({'licensePlates': licensePlateData})
@@ -117,6 +124,8 @@ def processBytesToImage(request):
         testImage = TestImage.objects.create(image=uploaded_file)
         print(testImage.id)
         temp_file.close()
+
+        
 
         
         return JsonResponse("Done", status=200, safe=False)

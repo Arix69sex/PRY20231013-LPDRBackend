@@ -137,7 +137,7 @@ CORS_ALLOWED_ORIGINS = [
     "10.0.2.2:8000"
 ]
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.0.2.2']
+ALLOWED_HOSTS = ['*']
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'

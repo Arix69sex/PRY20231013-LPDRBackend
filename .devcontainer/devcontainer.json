@@ -1,0 +1,16 @@
+{
+	"name": "API WITH ML DEVCONTAINER",
+	"dockerComposeFile": "../docker-compose.yml",
+    "service": "api-ml",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-toolsai.jupyter",
+				"ms-toolsai.vscode-jupyter-powertoys",
+				"ms-python.python",
+				"ms-python.vscode-pylance"
+			]
+		}
+	},
+    "workspaceFolder": "/workspace"
+}
