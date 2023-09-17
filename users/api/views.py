@@ -114,6 +114,9 @@ def login(request):
     password = body.get("password")
 
     user = getUserByEmailInteractor(email)
+
+    print(user)
+
     if userExists and encryptorInstance.verify(password, user[0].password):
         expirationTime = datetime.utcnow() + timedelta(days=7)
         statusCode = 201

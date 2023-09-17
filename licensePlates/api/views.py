@@ -17,6 +17,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from lpdr.lpdr import get_license_plate
 import cv2
+import base64
+import numpy as np
 
 @require_http_methods(["GET"])
 def getLicensePlates(request):
@@ -111,12 +113,20 @@ def processBytesToImage(request):
     if (request.method == "POST"):
         body = json.loads(request.body.decode('utf-8'))
         image_data = body.get("bytes")
+
         image_bytes = bytes(image_data)  # This contains the raw bytes
         
         image = Image.open(BytesIO(image_bytes))
 
         processed_image = image.resize((200, 200))
         temp_file = BytesIO()
+
+        
+        jpg_as_np = np.frombuffer(image_bytes, dtype=np.uint8)
+        img = cv2.imdecode(jpg_as_np, flags=1)
+
+
+        text_plate = get_license_plate(img)
         processed_image.save(temp_file, format='JPEG')
         uploaded_file = SimpleUploadedFile("temp_image.jpg", temp_file.getvalue())
 
@@ -126,7 +136,7 @@ def processBytesToImage(request):
         temp_file.close()
 
         
-
+        print(text_plate)
         
         return JsonResponse("Done", status=200, safe=False)
     else:
