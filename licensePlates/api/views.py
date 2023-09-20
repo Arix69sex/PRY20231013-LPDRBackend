@@ -2,32 +2,34 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from infractions.api.serializers import InfractionSerializer
 from licensePlates.api.interactors.createLicensePlateInteractor import createLicensePlateInteractor
 from licensePlates.api.interactors.getLicensePlateByIdInteractor import getLicensePlateByIdInteractor
 from licensePlates.api.interactors.getLicensePlatesByUserInteractor import getLicensePlatesByUserInteractor
 from licensePlates.api.interactors.getLicensePlatesInteractor import getLicensePlatesInteractor
 from licensePlates.api.interactors.updateLicensePlateInteractor import updatelicensePlateInteractor
+from licensePlates.api.interactors.getLicensePlateByCodeInteractor import getLicensePlateByCodeInteractor
+from licensePlates.api.lib.checkIfCodeHasInfractions import getExternalInfracionsByCode
 from licensePlates.api.models import TestImage
 from users.api.decorators.JwtAuthRequired import JwtAuthRequired
 from users.api.interactors.getUserById import getUserByIdInteractor
 from licensePlates.api.serializers import LicencePlateSerializer
+from licensePlates.api.lib.createInfractionsOfLicensePlate import createInfractionsOfLicensePlate
+
 from PIL import Image
 from io import BytesIO
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from lpdr.lpdr import get_license_plate
 import cv2
-import base64
 import numpy as np
 
 @require_http_methods(["GET"])
 def getLicensePlates(request):
-    
-    im = cv2.imread('/workspace/lpdr/vehicle.jpeg')
-    print(get_license_plate(im))
-    
     licensePlates = getLicensePlatesInteractor()
     licensePlateData = [LicencePlateSerializer(licensePlate).data for licensePlate in licensePlates]
+    
     return JsonResponse({'licensePlates': licensePlateData})
 
 @JwtAuthRequired
@@ -107,37 +109,51 @@ def updateLicensePlate(request, licensePlateId):
     
 
 @require_http_methods(["POST"])
-@JwtAuthRequired
-@csrf_exempt   # Use this decorator for development to disable CSRF protection; use proper CSRF handling in production
-def processBytesToImage(request):
-    if (request.method == "POST"):
-        body = json.loads(request.body.decode('utf-8'))
-        image_data = body.get("bytes")
+def detectLicensePlateWithInfractions(request):
+    
+    body = json.loads(request.body.decode('utf-8'))
+    latitude = body.get("latitude")
+    longitude = body.get("longitude")
+    userId = body.get("userId")
+    user = getUserByIdInteractor(userId)
+    #img = body.get("image")
+    #image = bytes(img)
+    im = cv2.imread('/workspace/lpdr/vehicle.jpeg')
+    licensePlateTextResult = get_license_plate(im)
+    detectedData = []
 
-        image_bytes = bytes(image_data)  # This contains the raw bytes
-        
-        image = Image.open(BytesIO(image_bytes))
+    for element in licensePlateTextResult:
+        elementLen = len(element)
+        dataObject = {
+            "text": element[elementLen-1],
+            "image": element[elementLen-2],
+            "type": element[elementLen-3]
+        }
+        detectedData.append(dataObject)
 
-        processed_image = image.resize((200, 200))
-        temp_file = BytesIO()
+    licensePlatesCreated = []
+    infractionsCreated = []
+    for element in detectedData:
+        if (element["type"] == "car-plate"):
+            foundExistingPlate = getLicensePlateByCodeInteractor(element["text"])
+            if len(foundExistingPlate) < 10000:
+                infractions = getExternalInfracionsByCode(element["text"])
+                if len(infractions) > 0:
+                    licensePlateCreated = createLicensePlateInteractor(user, element["text"], latitude, longitude, False, False, element["image"])
+                    licensePlatesCreated.append(licensePlateCreated)
 
-        
-        jpg_as_np = np.frombuffer(image_bytes, dtype=np.uint8)
-        img = cv2.imdecode(jpg_as_np, flags=1)
+                    licensePlatesQuerySet = createInfractionsOfLicensePlate(licensePlateCreated, infractions)
+                    infractionsCreated = infractionsCreated + licensePlatesQuerySet
 
+    licensePlateData = [LicencePlateSerializer(licensePlate).data for licensePlate in licensePlatesCreated]
 
-        text_plate = get_license_plate(img)
-        processed_image.save(temp_file, format='JPEG')
-        uploaded_file = SimpleUploadedFile("temp_image.jpg", temp_file.getvalue())
+    statusCode = 200
 
+    if len(licensePlateData) > 0:
+        statusCode = 201
+    response = {
+        "licensePlatesCreated": licensePlateData,
+        "infractionsCreated": infractionsCreated
+    }
 
-        testImage = TestImage.objects.create(image=uploaded_file)
-        print(testImage.id)
-        temp_file.close()
-
-        
-        print(text_plate)
-        
-        return JsonResponse("Done", status=200, safe=False)
-    else:
-        return JsonResponse("Method not allowed", status=405, safe=False)
+    return JsonResponse(response, status=statusCode, safe=False)

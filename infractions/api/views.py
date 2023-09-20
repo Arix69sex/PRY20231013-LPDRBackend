@@ -54,7 +54,7 @@ def createInfraction(request):
     
     infractionCreated = createInfractionInteractor(licensePlate, name, level, fine)
 
-    if infractionCreated:
+    if infractionCreated != None:
         statusCode = 201
         responseMessage = 'Infraction created successfully'
     else:

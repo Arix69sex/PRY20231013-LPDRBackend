@@ -26,5 +26,6 @@ urlpatterns = [
     path('api/licensePlates/', include('licensePlates.api.urls')),
     path('api/vehicles/', include('vehicles.api.urls')),
     path('api/owners/', include('owners.api.urls')),
-    path('api/infractions/', include('infractions.api.urls'))
+    path('api/infractions/', include('infractions.api.urls')),
+    path('api/mockService/', include('externalInfractions.api.urls'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

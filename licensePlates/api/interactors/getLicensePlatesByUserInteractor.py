@@ -3,7 +3,6 @@ from licensePlates.api.models import LicensePlate
 
 def getLicensePlatesByUserInteractor(user):
     try:
-        print("trest")
         licensePlate = LicensePlate.objects.filter(user=user)
         return licensePlate
     except Exception as e:

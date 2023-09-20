@@ -19,4 +19,5 @@ def get_license_plate(image):
         
         df_plates["text"] = plate_text
 
+    print("columns", df_plates.columns)
     return df_plates.values
