@@ -9,5 +9,6 @@ urlpatterns = [
     path('user/<int:userId>', views.getLicensePlateByUserId, name='get License Plate By User Id'),  
     path('<int:licensePlateId>', views.getLicensePlateById, name='get License Plate By Id'),  
     path('<int:licensePlateId>/update', views.updateLicensePlate, name='Update a License Plate'),
-    path('detect', views.detectLicensePlateWithInfractions, name='Detect License Plate With Infractions')
+    path('detect', views.detectLicensePlateWithInfractions, name='Detect License Plate With Infractions'),
+    path('image/<int:licensePlateId>', views.getImageOfLicensePlate, name='Get Image Of License Plate')
 ]

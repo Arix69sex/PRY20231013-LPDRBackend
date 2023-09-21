@@ -8,5 +8,6 @@ class JWT:
         return token
     def decode(self, token):
         secret = config('SECRET_KEY')
+        print("toekn", token)
         payload = jwt.decode(token, secret, algorithms=["HS256"])
         return payload

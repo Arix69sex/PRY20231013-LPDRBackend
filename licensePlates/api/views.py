@@ -1,8 +1,9 @@
+import io
 import json
+import random
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from infractions.api.serializers import InfractionSerializer
 from licensePlates.api.interactors.createLicensePlateInteractor import createLicensePlateInteractor
 from licensePlates.api.interactors.getLicensePlateByIdInteractor import getLicensePlateByIdInteractor
 from licensePlates.api.interactors.getLicensePlatesByUserInteractor import getLicensePlatesByUserInteractor
@@ -10,16 +11,13 @@ from licensePlates.api.interactors.getLicensePlatesInteractor import getLicenseP
 from licensePlates.api.interactors.updateLicensePlateInteractor import updatelicensePlateInteractor
 from licensePlates.api.interactors.getLicensePlateByCodeInteractor import getLicensePlateByCodeInteractor
 from licensePlates.api.lib.checkIfCodeHasInfractions import getExternalInfracionsByCode
-from licensePlates.api.models import TestImage
 from users.api.decorators.JwtAuthRequired import JwtAuthRequired
 from users.api.interactors.getUserById import getUserByIdInteractor
 from licensePlates.api.serializers import LicencePlateSerializer
 from licensePlates.api.lib.createInfractionsOfLicensePlate import createInfractionsOfLicensePlate
 
 from PIL import Image
-from io import BytesIO
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.http import HttpResponse
 
 from lpdr.lpdr import get_license_plate
 import cv2
@@ -112,16 +110,28 @@ def updateLicensePlate(request, licensePlateId):
 def detectLicensePlateWithInfractions(request):
     
     body = json.loads(request.body.decode('utf-8'))
-    latitude = body.get("latitude")
-    longitude = body.get("longitude")
+    latitude = body.get("latitude") or 1
+    longitude = body.get("longitude") or 1
     userId = body.get("userId")
     user = getUserByIdInteractor(userId)
-    #img = body.get("image")
-    #image = bytes(img)
-    im = cv2.imread('/workspace/lpdr/vehicle.jpeg')
-    licensePlateTextResult = get_license_plate(im)
-    detectedData = []
+    
+    img_bytes = body.get("image")
+    image = bytes(img_bytes)
 
+    random_number = random.randint(1, 100000000)
+    pilimage = Image.open(io.BytesIO(image))
+
+    file_name = f'uploaded_image_${random_number}.png'
+    file_path = "media/images/"+ file_name
+
+    pilimage.save(file_path)
+
+    im = cv2.imread(file_path)
+
+
+    licensePlateTextResult = get_license_plate(im)
+
+    detectedData = []
     for element in licensePlateTextResult:
         elementLen = len(element)
         dataObject = {
@@ -157,3 +167,11 @@ def detectLicensePlateWithInfractions(request):
     }
 
     return JsonResponse(response, status=statusCode, safe=False)
+
+
+@require_http_methods(["GET"])
+def getImageOfLicensePlate(request, licensePlateId):
+    licensePlate = getLicensePlateByIdInteractor(licensePlateId)
+
+    with open(licensePlate.imageData.path, "rb") as image_file:
+        return HttpResponse(image_file.read(), content_type="image/jpeg")

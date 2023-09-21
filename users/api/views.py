@@ -15,7 +15,6 @@ from users.api.interface.Encryptor import Encryptor
 from users.api.lib.validateValidEmail import isValidEmail
 from users.api.serializers import UserSerializer
 from users.api.interface.JWT import JWT
-from django.contrib.auth.decorators import login_required
 
 from usersData.api.interactors.createUserDataInteractor import createUserDataByIdInteractor
 
@@ -114,21 +113,23 @@ def login(request):
     password = body.get("password")
 
     user = getUserByEmailInteractor(email)
-
-    print(user)
-
-    if userExists and encryptorInstance.verify(password, user[0].password):
+    
+    if len(user) > 0 and encryptorInstance.verify(password, user[0].password):
         expirationTime = datetime.utcnow() + timedelta(days=7)
         statusCode = 201
-        responseMessage = JWTinstance.encode({
+        token = JWTinstance.encode({
             "id": user[0].id,
             "email": email,
-           "exp": expirationTime
+            "exp": expirationTime
         })
     else:
         statusCode = 400
-        responseMessage = "User email or password is incorrect."
-    return JsonResponse(responseMessage, status=statusCode, safe=False)
+        token = None
+
+    response = {
+        "token": token
+        }
+    return JsonResponse(response, status=statusCode, safe=False)
 
 @require_http_methods(["POST"])
 @csrf_exempt  # Use this decorator for development to disable CSRF protection; use proper CSRF handling in production
@@ -150,12 +151,16 @@ def signUp(request):
 
     if userCreated:
         statusCode = 201
-        responseMessage = JWTinstance.encode({
+        token = JWTinstance.encode({
             "id": userCreated.id,
             "email": email,
             "exp": expirationTime
         })
     else:
         statusCode = 400
-        responseMessage = 'User data creation failed'
-    return JsonResponse(responseMessage, status=statusCode, safe=False)
+        token = None
+        
+    response = {
+        "token": token
+    }
+    return JsonResponse(response, status=statusCode, safe=False)
