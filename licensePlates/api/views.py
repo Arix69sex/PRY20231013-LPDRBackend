@@ -138,6 +138,7 @@ def detectLicensePlateWithInfractions(request):
             "image": element[elementLen-2],
             "type": element[elementLen-3]
         }
+        print("text", element[elementLen-1])
         detectedData.append(dataObject)
 
     licensePlatesCreated = []

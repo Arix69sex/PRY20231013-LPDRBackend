@@ -5,7 +5,7 @@ from users.api.models import User
 
 class UserData(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    identification = models.TextField()
+    identification = models.TextField(unique=True)
     names = models.CharField(max_length=50)
     lastNames = models.CharField(max_length=50)
     address = models.CharField(max_length=100)

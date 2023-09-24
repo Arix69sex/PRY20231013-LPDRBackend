@@ -1,9 +1,9 @@
 from django.http import JsonResponse
 from externalInfractions.api.models import ExternalInfraction
 
-def createMockInfractionInteractor(code, name, level, fine):
+def createMockInfractionInteractor(code, infractionCode, ballotNumber, name, level, fine, date):
     try:
-        mockInfractions = ExternalInfraction.objects.create(code=code, name= name, level=level, fine=fine)
+        mockInfractions = ExternalInfraction.objects.create(code=code, infractionCode=infractionCode, ballotNumber=ballotNumber, name= name, level=level, fine=fine, date=date)
         return mockInfractions
     except Exception as e:
         print("error: ", e)

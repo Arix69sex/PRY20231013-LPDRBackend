@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
@@ -11,11 +12,15 @@ def createMockInfraction(request):
     body = json.loads(request.body.decode('utf-8'))
 
     code = body.get("code")
+    infractionCode = body.get("infractionCode")
+    ballotNumber = body.get("ballotNumber")
     name = body.get("name")
     level = body.get("level")
     fine = body.get("fine")
+    date = body.get("date")
+    formatted_date = datetime.strptime(date, '%Y-%m-%d')
 
-    mockInfractionCreated = createMockInfractionInteractor(code, name, level, fine)
+    mockInfractionCreated = createMockInfractionInteractor(code, infractionCode, ballotNumber, name, level, fine, formatted_date)
     if mockInfractionCreated:
         statusCode = 201
         mockInfraction = ExternalInfractionSerializer(mockInfractionCreated)
