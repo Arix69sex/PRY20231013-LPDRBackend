@@ -91,10 +91,9 @@ def updateLicensePlate(request, licensePlateId):
         longitude = body.get("longitude")
         hasInfractions = body.get("hasInfractions")
         takenActions = body.get("takenActions")
-        imageData = body.get("imageData")
         licensePlate = getLicensePlateByIdInteractor(licensePlateId)
 
-        licensePlateUpdated = updatelicensePlateInteractor(licensePlate, code, latitude, longitude, hasInfractions, takenActions, imageData)
+        licensePlateUpdated = updatelicensePlateInteractor(licensePlate, code, latitude, longitude, hasInfractions, takenActions)
         if licensePlateUpdated:
             statusCode = 200
             responseMessage = 'License plate updated successfully'
@@ -139,6 +138,7 @@ def detectLicensePlateWithInfractions(request):
             "image": element[elementLen-2],
             "type": element[elementLen-3]
         }
+        print("text", element[elementLen-1])
         detectedData.append(dataObject)
 
     licensePlatesCreated = []

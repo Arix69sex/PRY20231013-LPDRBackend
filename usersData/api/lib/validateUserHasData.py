@@ -4,4 +4,4 @@ from usersData.api.interactors.getUserDataByUserInteractor import getUserDataByU
 def validateUserHasData(user):
     hasUserData = getUserDataByUserInteractor(user)
     if hasUserData.exists():
-        raise Exception("User doesn't have User Data")
+        raise Exception("User already has User Data")

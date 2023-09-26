@@ -14,7 +14,7 @@ class LicensePlate(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Code: {self.code}, Latitude: {self.latitude}, Longitude: {self.longitude}, User: {self.user.username}"
+        return f"Code: {self.code}, Latitude: {self.latitude}, Longitude: {self.longitude}, User: {self.user.username}, CreatedAt: {self.createdAt}"
     
 
 class TestImage(models.Model):

@@ -4,4 +4,4 @@ from externalInfractions.api.models import ExternalInfraction
 class ExternalInfractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExternalInfraction 
-        fields = ('id', 'code', 'name', 'level', 'fine')
+        fields = ('id', 'infractionCode', 'ballotNumber', 'code', 'name', 'level', 'fine', 'date')
