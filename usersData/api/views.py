@@ -9,6 +9,7 @@ from usersData.api.interactors.getUserDataByIdInteractor import getUserDataByIdI
 from usersData.api.interactors.getUserDataByUserInteractor import getUserDataByUserInteractor
 from usersData.api.interactors.getUsersDataInteractor import getUsersDataInteractor
 from usersData.api.interactors.updateUserDataInteractor import updateUserDataInteractor
+from usersData.api.lib.validPhoneNumberFormat import validPhoneNumberFormat
 from usersData.api.lib.validateUserHasData import validateUserHasData
 
 from usersData.api.serializers import UserDataSerializer
@@ -75,17 +76,27 @@ def updateUserData(request, userDataId):
         names = body.get("names")
         lastNames = body.get("lastNames")
         address = body.get("address")
-        phoneNumber = body.get("lastNames")
-
-        userData = getUserDataByIdInteractor(userDataId)
-        userDataUpdated = updateUserDataInteractor(userData, identification, names, lastNames, address, phoneNumber)
-
-        if userDataUpdated:
-            statusCode = 200
-            responseMessage = 'User data updated successfully'
+        phoneNumber = body.get("phoneNumber")
+        response = {}
+        statusCode = 400
+        if validPhoneNumberFormat(phoneNumber):
+            userData = getUserDataByIdInteractor(userDataId)
+            userDataUpdated = updateUserDataInteractor(userData, identification, names, lastNames, address, phoneNumber)
+            if userDataUpdated:
+                response = {
+                    "userDataUpdated": userDataUpdated
+                }
+                statusCode = 200
+            else:
+                response = {
+                    "userDataUpdated": {}
+                }
+                statusCode = 400
         else:
+            response = {
+                    "userDataUpdated": {}
+            }
             statusCode = 400
-            responseMessage = 'User data update failed'
-        return JsonResponse(responseMessage, status=statusCode, safe=False)
+        return JsonResponse(response, status=statusCode, safe=False)
     else:
         return JsonResponse("Method not allowed", status=405, safe=False)
