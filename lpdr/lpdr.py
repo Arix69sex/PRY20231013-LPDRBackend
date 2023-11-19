@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-
 import lpdr.detection.detection as detection
 import lpdr.recognition.recognition as recognition
 

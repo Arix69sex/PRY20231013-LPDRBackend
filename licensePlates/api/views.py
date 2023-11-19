@@ -1,6 +1,7 @@
 import io
 import json
 import random
+import re
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
@@ -15,7 +16,7 @@ from users.api.decorators.JwtAuthRequired import JwtAuthRequired
 from users.api.interactors.getUserById import getUserByIdInteractor
 from licensePlates.api.serializers import LicencePlateSerializer
 from licensePlates.api.lib.createInfractionsOfLicensePlate import createInfractionsOfLicensePlate
-
+import pandas as pd
 from PIL import Image
 from django.http import HttpResponse
 
@@ -172,6 +173,86 @@ def detectLicensePlateWithInfractions(request):
 @require_http_methods(["GET"])
 def getImageOfLicensePlate(request, licensePlateId):
     licensePlate = getLicensePlateByIdInteractor(licensePlateId)
-
     with open(licensePlate.imageData.path, "rb") as image_file:
+        im = cv2.imread(licensePlate.imageData.path)
         return HttpResponse(image_file.read(), content_type="image/jpeg")
+    
+@require_http_methods(["GET"])
+def validateFunctionality(request):
+    result = validate()
+    return JsonResponse(result, status=200, safe=False)
+
+def validate():
+    result = {
+        "metadata": {
+            "correct": 0,
+            "incorrect": 0,
+            "total": 0
+        },
+        "data": []
+    }
+    correct = 0
+    wrong = 0
+    csvFilePath = '/workspace/lpdr/validation/dataset/data-autos-placa.csv'
+    dataFrame = pd.read_csv(csvFilePath)
+
+    print("dataFrame", dataFrame)
+
+    imagesData = []
+
+    for index, row in dataFrame.iterrows():
+        dataString = row['CODIGO DE PLACA;;NOMBRE-ARCHIVO;CON INFRACCIONES']
+        parts = dataString.split(';')
+        code = parts[0]
+        number = parts[1]
+        fileName = parts[2]
+        hasInfractions = parts[3]
+        if code != "":
+            imagesData.append({
+                    "code": code,
+                    "number": number,
+                    "fileName": fileName,
+                    "hasInfractions": hasInfractions
+                })
+
+    imagesFolderPath = '/workspace/lpdr/validation/images/'
+    for index, imageData in enumerate(imagesData):
+        imagePath = imagesFolderPath + imageData['fileName']
+        try:
+            image = cv2.imread(imagePath)
+            licensePlateTextResult = get_license_plate(image)
+            if len(licensePlateTextResult) > 0:
+                for element in licensePlateTextResult:
+                    elementLen = len(element)
+                    obj = {
+                        "expected": imageData['code'],
+                        "detected": element[elementLen-1],
+                        "number": imageData['number']
+                    }
+                    result["data"].append(obj)
+                    if (imageData['code'] == element[elementLen-1]):
+                        correct += 1
+                    else: 
+                        wrong += 1
+            else:
+                obj = {
+                    "expected": imageData['code'],
+                    "number": imageData['number']
+                }
+                
+                result["data"].append(obj)
+                pattern = re.compile(r'^[A-Z]{3}-\d{3}$')
+                if bool(pattern.match(imageData['code'])):
+                    correct += 1
+                else:
+                    wrong += 1
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            wrong += 1
+
+    result["metadata"]["correct"] = correct
+    result["metadata"]["incorrect"] = wrong
+    result["metadata"]["total"] = wrong + correct
+
+    return result
+    
